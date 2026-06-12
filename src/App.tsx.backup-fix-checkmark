@@ -982,7 +982,7 @@ function PokerChart({ game }: { game: Game }) {
                   {p.name === game.host ? (
                     <span className="corner-mark host-dash">-</span>
                   ) : p.hostFeePaid ? (
-                    <span className="corner-mark host-check">&#10003;</span>
+                    <span className="corner-mark host-check">?</span>
                   ) : null}
                 </td>
 
@@ -1054,7 +1054,6 @@ function Modal({ title, children, onClose, wide = false }: { title: string; chil
     </motion.div>
   );
 }
-
 
 
 
