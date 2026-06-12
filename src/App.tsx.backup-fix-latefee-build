@@ -130,7 +130,7 @@ function makeEmptyGame(): Game {
     birthdayHostFeeAmount: 0,
     birthdayPlayers: [],
     lateFeeEnabled: true,
-    lateFeeStartTime: "15:00",
+    lateFeeStartTime: "18:00",
     lateFeePerMinutes: 5,
     lateFeeAmount: 1,
     chipUnit: 1,
@@ -181,7 +181,7 @@ function migrateGame(rawGame: any): Game {
   g.birthdayPlayers = rawGame?.birthdayPlayers || [];
   g.birthdayHostFeeAmount = Number(rawGame?.birthdayHostFeeAmount ?? 0);
   g.lateFeeEnabled = rawGame?.lateFeeEnabled ?? true;
-  g.lateFeeStartTime = rawGame?.lateFeeStartTime || "15:00";
+  g.lateFeeStartTime = rawGame?.lateFeeStartTime || "18:00";
   g.lateFeePerMinutes = Number(rawGame?.lateFeePerMinutes || 5);
   g.lateFeeAmount = Number(rawGame?.lateFeeAmount || 1);
   return g;
@@ -230,24 +230,6 @@ function cloneGame(game: Game): Game {
   return JSON.parse(JSON.stringify(game));
 }
 
-
-function calculateLateFee(g: Game) {
-  if (!g.lateFeeEnabled) return 0;
-
-  const now = new Date();
-  const [month, day, year] = g.date.split("/").map(Number);
-  const [hour, minute] = g.lateFeeStartTime.split(":").map(Number);
-
-  if (!month || !day || !year) return 0;
-
-  const start = new Date(year, month - 1, day, hour || 15, minute || 0, 0, 0);
-  const minutesLate = Math.floor((now.getTime() - start.getTime()) / 60000);
-
-  if (minutesLate <= 0) return 0;
-
-  const units = Math.floor(minutesLate / Number(g.lateFeePerMinutes || 5));
-  return units * Number(g.lateFeeAmount || 1);
-}
 function hostFeeDueForPlayer(g: Game, playerName: string) {
   if (playerName === g.host) return 0;
   if (g.birthdayPlayers.includes(playerName)) return Number(g.birthdayHostFeeAmount || 0);
@@ -376,7 +358,7 @@ export default function App() {
     if (!name) return;
     if (game.players.some((p) => p.name.toLowerCase() === name.toLowerCase())) return;
     updateGame((g) => {
-      g.players.push({ name, color: "p-guest", buyIns: 0, hostFeePaid: false, lateFeePaid: 0, cashOut: "" });
+      g.players.push({ name, color: "p-guest", buyIns: 0, hostFeePaid: false, cashOut: "" });
       addLog(g, `Guest player added: ${name}.`, "info");
     });
     setNewPlayerName("");
@@ -711,7 +693,7 @@ export default function App() {
             <label>Regular Host Fee<input inputMode="numeric" value={game.hostFeeAmount} onChange={(e) => updateGame((g) => { g.hostFeeAmount = Number(e.target.value || 10); })} /></label>
             <label>Birthday Host Fee<input inputMode="numeric" value={game.birthdayHostFeeAmount} onChange={(e) => updateGame((g) => { g.birthdayHostFeeAmount = Number(e.target.value || 0); })} /></label>
             <label>Smallest Chip Unit<input inputMode="numeric" value={game.chipUnit} onChange={(e) => updateGame((g) => { g.chipUnit = Number(e.target.value || 1); })} /></label>
-            <label>Late Fee Start<input type="time" value={game.lateFeeStartTime} onChange={(e) => updateGame((g) => { g.lateFeeStartTime = e.target.value || "15:00"; })} /></label>
+            <label>Late Fee Start<input type="time" value={game.lateFeeStartTime} onChange={(e) => updateGame((g) => { g.lateFeeStartTime = e.target.value || "18:00"; })} /></label>
             <label>Late Fee $ / 5 Min<input inputMode="numeric" value={game.lateFeeAmount} onChange={(e) => updateGame((g) => { g.lateFeeAmount = Number(e.target.value || 1); })} /></label>
           </div>
           <div className="birthday-card">
@@ -1054,7 +1036,6 @@ function Modal({ title, children, onClose, wide = false }: { title: string; chil
     </motion.div>
   );
 }
-
 
 
 
